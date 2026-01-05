@@ -17,20 +17,18 @@ class DatabaseSeeder extends Seeder
     {
         // User::factory(10)->create();
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+
 
         // Ejecutar seeders en orden de dependencias
         $this->call([
-            TrackSeeder::class,
-            CourseSeeder::class,
-            LessonSeeder::class,
-            LessonItemSeeder::class,
-            QuestionSeeder::class,
-            QuestionOptionSeeder::class,
-            EnrollmentSeeder::class,
+            UserSeeder::class,
+            // TrackSeeder::class,
+            // CourseSeeder::class,
+            // LessonSeeder::class,
+            // LessonItemSeeder::class,
+            // QuestionSeeder::class,
+            // QuestionOptionSeeder::class,
+            // EnrollmentSeeder::class,
         ]);
     }
 }
