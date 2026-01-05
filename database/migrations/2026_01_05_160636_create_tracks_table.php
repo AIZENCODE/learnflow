@@ -9,10 +9,42 @@ return new class extends Migration
     /**
      * Run the migrations.
      */
+
+    //  Rutas
     public function up(): void
     {
         Schema::create('tracks', function (Blueprint $table) {
             $table->id();
+
+            $table->string('name')->comment('Nombre de la ruta de aprendizaje');
+            $table->text('description')->nullable()->comment('Descripción de la ruta');
+            $table->integer('order')->default(0)->comment('Orden de visualización');
+
+
+            $table->float('xp_points')->default(0)->comment('Puntos de experiencia (XP)');
+
+
+            // SISTEMA DE TIEMPO LIMITADO
+            $table->boolean('has_time_limit')->default(false)->comment('¿Tiene tiempo límite?');
+            $table->date('start_date')->nullable()->comment('Fecha de inicio del período');
+            $table->date('end_date')->nullable()->comment('Fecha de finalización del período');
+            $table->enum('time_limit_type', ['from_enrollment', 'fixed_date', 'self_paced'])
+                ->default('self_paced')
+                ->comment('Tipo de límite de tiempo');
+
+
+
+            // Auditoría
+            $table->foreignId('created_by')
+                ->nullable()
+                ->constrained('users')
+                ->comment('Usuario que creó la ruta');
+
+            $table->foreignId('updated_by')
+                ->nullable()
+                ->constrained('users')
+                ->comment('Usuario que actualizó por última vez');
+
             $table->timestamps();
         });
     }

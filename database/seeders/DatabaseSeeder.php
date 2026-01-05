@@ -21,5 +21,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Test User',
             'email' => 'test@example.com',
         ]);
+
+        // Ejecutar seeders en orden de dependencias
+        $this->call([
+            TrackSeeder::class,
+            CourseSeeder::class,
+            LessonSeeder::class,
+            LessonItemSeeder::class,
+            QuestionSeeder::class,
+            QuestionOptionSeeder::class,
+            EnrollmentSeeder::class,
+        ]);
     }
 }
