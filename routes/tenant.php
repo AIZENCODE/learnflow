@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Admin\UserController;
+use App\Http\Controllers\Admin\CompanyController;
+use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\TrackController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -36,7 +39,9 @@ Route::middleware([
     });
 
     Route::resource('users', UserController::class);
-
+    Route::resource('companies', CompanyController::class);
+    Route::resource('tracks', TrackController::class);
+    Route::resource('courses', CourseController::class);
     require __DIR__ . '/auth.php';
 });
 
