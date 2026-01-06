@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
@@ -24,6 +25,18 @@ Route::middleware([
     PreventAccessFromCentralDomains::class,
 ])->group(function () {
     Route::get('/', function () {
-        return 'This is your multi-tenant application. The id of the current tenant is ' . tenant('id');
+        return view('admin.welcome');
     });
+
+
+    Route::middleware('auth')->group(function () {
+        Route::get('dashboard', function () {
+            return view('admin.dashboard');
+        })->name('dashboard');
+    });
+
+    Route::resource('users', UserController::class);
+
+    require __DIR__ . '/auth.php';
 });
+

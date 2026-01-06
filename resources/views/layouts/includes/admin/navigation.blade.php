@@ -7,9 +7,9 @@
         ],
 
         [
-            'name' => 'Tenants',
-            'href' => url('/tenants'),
-            'active' => request()->routeIs('tenants.index'),
+            'name' => 'Usuarios',
+            'href' => url('/users'),
+            'active' => request()->routeIs('users.index'),
         ],
     ];
 @endphp

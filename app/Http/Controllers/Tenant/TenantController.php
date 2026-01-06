@@ -31,17 +31,17 @@ class TenantController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'id' => 'required|string|unique:tenants,id|max:255',
         ]);
 
         // return $request->all();
 
         $tenant = Tenant::create([
-            'name' => $request->name,
+            'id' => $request->id,
         ]);
         $tenant->domains()->create([
             // 'domain' => $request->name . '.' . config('tenancy.central_domains')[0],
-            'domain' => $request->name . '.learnflow.test',
+            'domain' => $request->id . '.learnflow.test',
         ]);
         return redirect()->route('tenants.index')->with('success', 'Tenant created successfully');
     }
@@ -67,8 +67,17 @@ class TenantController extends Controller
      */
     public function update(Request $request, Tenant $tenant)
     {
-        $tenant->update($request->all());
-        return redirect()->route('tenants.inquilinos.index')->with('success', 'Tenant updated successfully');
+        $request->validate([
+            'id' => 'required|string|unique:tenants,id,' . $tenant->id . '|max:255',
+        ]);
+        $tenant->update([
+            'id' => $request->get('id')
+        ]);
+
+        $tenant->domains()->update([
+            'domain' => $request->get('id') . '.learnflow.test',
+        ]);
+        return redirect()->route('tenants.index')->with('success', 'Tenant updated successfully');
     }
 
     /**
@@ -77,6 +86,6 @@ class TenantController extends Controller
     public function destroy(Tenant $tenant)
     {
         $tenant->delete();
-        return redirect()->route('tenants.inquilinos.index')->with('success', 'Tenant deleted successfully');
+        return redirect()->route('tenants.index')->with('success', 'Tenant deleted successfully');
     }
 }
