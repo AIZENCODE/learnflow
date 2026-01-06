@@ -15,7 +15,7 @@
         @endif
 
         <div class="bg-white dark:bg-gray-800 shadow rounded-lg p-6">
-            <form method="POST" action="{{ route('courses.update', $course) }}" class="">
+            <form method="POST" action="{{ route('courses.update', $course) }}" enctype="multipart/form-data" class="">
                 @csrf
                 @method('PUT')
 
@@ -112,26 +112,59 @@
                         <x-input-error class="mt-2" :messages="$errors->get('xp_points')" />
                     </div>
 
-                    <!-- Rutas de archivos -->
+                    <!-- Archivos multimedia -->
                     <div>
-                        <x-input-label for="icon_path" :value="__('Ruta del Icono')" />
-                        <x-text-input id="icon_path" name="icon_path" type="text" class="mt-1 block w-full"
-                            :value="old('icon_path', $course->icon_path)" />
+                        <x-input-label for="icon_path" :value="__('Icono del Curso')" />
+                        <input type="file" id="icon_path" name="icon_path" accept="image/*"
+                            class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-600"
+                            onchange="previewImage(this, 'icon_preview')">
                         <x-input-error class="mt-2" :messages="$errors->get('icon_path')" />
+                        <div class="mt-2">
+                            @if($course->icon_path)
+                                <img id="icon_preview" src="{{ asset($course->icon_path) }}"
+                                    alt="Icono actual" class="h-24 w-24 object-contain rounded border border-gray-300 dark:border-gray-700">
+                            @else
+                                <img id="icon_preview" src="" alt="Vista previa del icono"
+                                    class="h-24 w-24 object-contain rounded border border-gray-300 dark:border-gray-700 hidden">
+                            @endif
+                        </div>
                     </div>
 
                     <div>
-                        <x-input-label for="image_path" :value="__('Ruta de la Imagen')" />
-                        <x-text-input id="image_path" name="image_path" type="text" class="mt-1 block w-full"
-                            :value="old('image_path', $course->image_path)" />
+                        <x-input-label for="image_path" :value="__('Imagen del Curso')" />
+                        <input type="file" id="image_path" name="image_path" accept="image/*"
+                            class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-600"
+                            onchange="previewImage(this, 'image_preview')">
                         <x-input-error class="mt-2" :messages="$errors->get('image_path')" />
+                        <div class="mt-2">
+                            @if($course->image_path)
+                                <img id="image_preview" src="{{ asset($course->image_path) }}"
+                                    alt="Imagen actual" class="h-48 w-full object-cover rounded border border-gray-300 dark:border-gray-700">
+                            @else
+                                <img id="image_preview" src="" alt="Vista previa de la imagen"
+                                    class="h-48 w-full object-cover rounded border border-gray-300 dark:border-gray-700 hidden">
+                            @endif
+                        </div>
                     </div>
 
                     <div>
-                        <x-input-label for="video_path" :value="__('Ruta del Video')" />
-                        <x-text-input id="video_path" name="video_path" type="text" class="mt-1 block w-full"
-                            :value="old('video_path', $course->video_path)" />
+                        <x-input-label for="video_path" :value="__('Video del Curso')" />
+                        <input type="file" id="video_path" name="video_path" accept="video/*"
+                            class="mt-1 block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-gray-50 dark:file:bg-gray-700 file:text-gray-700 dark:file:text-gray-300 hover:file:bg-gray-100 dark:hover:file:bg-gray-600"
+                            onchange="previewVideo(this, 'video_preview')">
                         <x-input-error class="mt-2" :messages="$errors->get('video_path')" />
+                        <div class="mt-2">
+                            @if($course->video_path)
+                                <video id="video_preview" controls class="w-full rounded border border-gray-300 dark:border-gray-700" style="max-height: 300px;">
+                                    <source src="{{ asset($course->video_path) }}" type="video/mp4">
+                                    Tu navegador no soporta la reproducción de videos.
+                                </video>
+                            @else
+                                <video id="video_preview" controls class="w-full rounded border border-gray-300 dark:border-gray-700 hidden" style="max-height: 300px;">
+                                    Tu navegador no soporta la reproducción de videos.
+                                </video>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Checkboxes -->
@@ -174,5 +207,37 @@
         <!-- Componente Livewire para gestionar lecciones -->
         @livewire('course-lessons', ['course' => $course->id])
     </div>
+
+    <script>
+        function previewImage(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.classList.remove('hidden');
+                };
+                reader.readAsDataURL(input.files[0]);
+            } else {
+                if (!preview.src || preview.src === '') {
+                    preview.classList.add('hidden');
+                }
+            }
+        }
+
+        function previewVideo(input, previewId) {
+            const preview = document.getElementById(previewId);
+            if (input.files && input.files[0]) {
+                const file = input.files[0];
+                const url = URL.createObjectURL(file);
+                preview.src = url;
+                preview.classList.remove('hidden');
+            } else {
+                if (!preview.src || preview.src === '') {
+                    preview.classList.add('hidden');
+                }
+            }
+        }
+    </script>
 </x-tenancy-layout>
 

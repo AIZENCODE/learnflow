@@ -35,6 +35,12 @@ return new class extends Migration
             $table->integer('points')->default(1)->comment('Puntos por responder correctamente');
             $table->integer('time_limit')->nullable()->comment('Límite de tiempo en segundos');
 
+            // Relaciones
+            $table->foreignId('lesson_item_id')
+                ->nullable()
+                ->constrained('lesson_items')
+                ->onDelete('cascade');
+
             // Auditoría
             $table->foreignId('created_by')
                 ->nullable()

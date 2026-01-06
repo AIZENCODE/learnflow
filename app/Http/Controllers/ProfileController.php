@@ -16,7 +16,13 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
-        return view('profile.edit', [
+        // Detectar si estamos en un tenant
+        $isTenant = tenancy()->tenant !== null;
+        
+        // Si estamos en un tenant, usar la vista con tenancy-layout
+        $view = $isTenant ? 'profile.edit-tenant' : 'profile.edit';
+        
+        return view($view, [
             'user' => $request->user(),
         ]);
     }

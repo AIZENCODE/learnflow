@@ -17,6 +17,10 @@ class Track extends Model
         'start_date',
         'end_date',
         'time_limit_type',
+        'image_path',
+        'background_path',
+        'video_path',
+        'icon_path',
         'created_by',
         'updated_by',
     ];

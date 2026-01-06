@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\Track;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
 
 class CourseController extends Controller
@@ -30,9 +31,9 @@ class CourseController extends Controller
             'slug' => 'nullable|string|max:255|unique:courses,slug',
             'description' => 'nullable|string',
             'show_media_type' => 'required|in:image,video,none',
-            'icon_path' => 'nullable|string|max:255',
-            'image_path' => 'nullable|string|max:255',
-            'video_path' => 'nullable|string|max:255',
+            'icon_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+            'video_path' => 'nullable|mimes:mp4,webm,ogg|max:10240',
             'is_external_link' => 'boolean',
             'short_description' => 'nullable|string',
             'duration_minutes' => 'nullable|integer|min:0',
@@ -47,6 +48,45 @@ class CourseController extends Controller
         // Generar slug automáticamente si no se proporciona
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
+        }
+
+        // Manejar subida de archivos
+        $mediaFields = ['icon_path', 'image_path', 'video_path'];
+        foreach ($mediaFields as $field) {
+            if ($request->hasFile($field)) {
+                try {
+                    $tenant = tenancy()->tenant;
+                    if (!$tenant) {
+                        throw new \Exception('No hay tenant activo.');
+                    }
+
+                    $currentStoragePath = storage_path();
+                    $expectedTenantPath = 'tenant' . $tenant->id;
+
+                    if (strpos($currentStoragePath, $expectedTenantPath) === false) {
+                        \Log::warning('FilesystemTenancyBootstrapper no modificó storage_path(). Forzando configuración manual.');
+                        $tenantStoragePath = base_path('storage/' . $expectedTenantPath . '/app/public');
+                        config(['filesystems.disks.public.root' => $tenantStoragePath]);
+                        app()->forgetInstance('filesystem.disk.public');
+                    }
+
+                    $disk = Storage::disk('public');
+                    $file = $request->file($field);
+                    $filename = 'course_' . $field . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+                    if (!$disk->exists('courses')) {
+                        $disk->makeDirectory('courses');
+                    }
+
+                    $path = $disk->putFileAs('courses', $file, $filename);
+                    $validated[$field] = $path;
+                } catch (\Exception $e) {
+                    \Log::error('Error guardando archivo ' . $field . ': ' . $e->getMessage());
+                    $validated[$field] = null;
+                }
+            } else {
+                $validated[$field] = null;
+            }
         }
 
         $validated['is_external_link'] = $request->has('is_external_link') ? true : false;
@@ -78,9 +118,9 @@ class CourseController extends Controller
             'slug' => 'nullable|string|max:255|unique:courses,slug,' . $course->id,
             'description' => 'nullable|string',
             'show_media_type' => 'required|in:image,video,none',
-            'icon_path' => 'nullable|string|max:255',
-            'image_path' => 'nullable|string|max:255',
-            'video_path' => 'nullable|string|max:255',
+            'icon_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:2048',
+            'image_path' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg,webp|max:4096',
+            'video_path' => 'nullable|mimes:mp4,webm,ogg|max:10240',
             'is_external_link' => 'boolean',
             'short_description' => 'nullable|string',
             'duration_minutes' => 'nullable|integer|min:0',
@@ -95,6 +135,54 @@ class CourseController extends Controller
         // Generar slug automáticamente si no se proporciona
         if (empty($validated['slug'])) {
             $validated['slug'] = Str::slug($validated['title']);
+        }
+
+        // Manejar subida de archivos
+        $mediaFields = ['icon_path', 'image_path', 'video_path'];
+        foreach ($mediaFields as $field) {
+            if ($request->hasFile($field)) {
+                try {
+                    $tenant = tenancy()->tenant;
+                    if (!$tenant) {
+                        throw new \Exception('No hay tenant activo.');
+                    }
+
+                    $currentStoragePath = storage_path();
+                    $expectedTenantPath = 'tenant' . $tenant->id;
+
+                    if (strpos($currentStoragePath, $expectedTenantPath) === false) {
+                        \Log::warning('FilesystemTenancyBootstrapper no modificó storage_path(). Forzando configuración manual.');
+                        $tenantStoragePath = base_path('storage/' . $expectedTenantPath . '/app/public');
+                        config(['filesystems.disks.public.root' => $tenantStoragePath]);
+                        app()->forgetInstance('filesystem.disk.public');
+                    }
+
+                    $disk = Storage::disk('public');
+
+                    // Eliminar archivo anterior si existe
+                    if ($course->$field && $disk->exists($course->$field)) {
+                        $disk->delete($course->$field);
+                    }
+
+                    $file = $request->file($field);
+                    $filename = 'course_' . $field . '_' . time() . '.' . $file->getClientOriginalExtension();
+
+                    if (!$disk->exists('courses')) {
+                        $disk->makeDirectory('courses');
+                    }
+
+                    $path = $disk->putFileAs('courses', $file, $filename);
+                    $validated[$field] = $path;
+                } catch (\Exception $e) {
+                    \Log::error('Error guardando archivo ' . $field . ': ' . $e->getMessage());
+                    $validated[$field] = $course->$field;
+                }
+            } elseif ($course->$field) {
+                // Mantener el archivo existente si no se sube uno nuevo
+                $validated[$field] = $course->$field;
+            } else {
+                $validated[$field] = null;
+            }
         }
 
         $validated['is_external_link'] = $request->has('is_external_link') ? true : false;

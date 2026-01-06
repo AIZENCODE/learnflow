@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Admin;
+namespace App\Http\Controllers\Admin\Client;
 
 use App\Http\Controllers\Controller;
 use App\Models\Track;
@@ -18,12 +18,19 @@ class GeneralController extends Controller
             ->orderBy('order')
             ->get();
 
+        // Cursos publicados para mostrar a los clientes
+        $courses = \App\Models\Course::where('is_published', true)
+            ->with('track')
+            ->withCount('lessons')
+            ->orderBy('order_in_track')
+            ->get();
+
         // Estadísticas generales
         $totalTracks = Track::count();
         $totalCourses = \App\Models\Course::count();
         $publishedCourses = \App\Models\Course::where('is_published', true)->count();
         $totalUsers = \App\Models\User::count();
 
-        return view('admin.clients.general', compact('user', 'tracks', 'totalTracks', 'totalCourses', 'publishedCourses', 'totalUsers', 'company'));
+        return view('admin.clients.general', compact('user', 'tracks', 'courses', 'totalTracks', 'totalCourses', 'publishedCourses', 'totalUsers', 'company'));
     }
 }

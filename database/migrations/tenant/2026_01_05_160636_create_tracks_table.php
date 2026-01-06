@@ -20,6 +20,10 @@ return new class extends Migration
             $table->text('description')->nullable()->comment('Descripción de la ruta');
             $table->integer('order')->default(0)->comment('Orden de visualización');
 
+            $table->string('image_path')->nullable()->comment('Ruta de la imagen de la ruta');
+            $table->string('background_path')->nullable()->comment('Ruta de la imagen de fondo de la ruta');
+            $table->string('video_path')->nullable()->comment('Ruta del video de la ruta');
+            $table->string('icon_path')->nullable()->comment('Ruta del icono de la ruta');
 
             $table->float('xp_points')->default(0)->comment('Puntos de experiencia (XP)');
 

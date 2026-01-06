@@ -59,7 +59,7 @@
     class="sidebar fixed lg:static inset-y-0 left-0 z-50 w-64 bg-white dark:bg-gray-800 border-r border-gray-200 dark:border-gray-700 transform transition-transform duration-300 ease-in-out -translate-x-full lg:translate-x-0">
     <div class="flex flex-col h-full">
         <!-- Sidebar Header -->
-        <div class="flex items-center justify-between h-16 px-6 border-b border-gray-200 dark:border-gray-700">
+        <div class="flex items-center justify-between h-[65px] px-6 border-b border-gray-200 dark:border-gray-700">
             <div class="flex items-center space-x-3">
                 @if ($company && $company->logo_path)
                     <img src="{{ asset($company->logo_path) }}"

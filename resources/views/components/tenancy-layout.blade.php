@@ -43,6 +43,9 @@ $companyColor = $company->color_hex ?? '#000000';
         .btn__primary {
             background-color: var(--color-one);
         }
+        .color__one {
+            color: var(--color-one);
+        }
         @media (max-width: 1023px) {
             .sidebar {
                 position: fixed;
