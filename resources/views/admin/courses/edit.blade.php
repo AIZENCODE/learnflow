@@ -170,6 +170,9 @@
                 </div>
             </form>
         </div>
+
+        <!-- Componente Livewire para gestionar lecciones -->
+        @livewire('course-lessons', ['course' => $course->id])
     </div>
 </x-tenancy-layout>
 

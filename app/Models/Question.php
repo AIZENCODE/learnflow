@@ -15,6 +15,7 @@ class Question extends Model
         'correct_text_answer',
         'points',
         'time_limit',
+        'lesson_item_id',
         'created_by',
         'updated_by',
     ];
@@ -46,5 +47,10 @@ class Question extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function lessonItem(): BelongsTo
+    {
+        return $this->belongsTo(LessonItem::class);
     }
 }

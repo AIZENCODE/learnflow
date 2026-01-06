@@ -98,6 +98,9 @@
                 </div>
             </form>
         </div>
+
+        <!-- Componente Livewire para gestionar cursos -->
+        @livewire('track-courses', ['track' => $track->id])
     </div>
 
     <script>

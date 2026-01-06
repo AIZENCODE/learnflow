@@ -21,14 +21,14 @@ class DatabaseSeeder extends Seeder
 
         // Ejecutar seeders en orden de dependencias
         $this->call([
-            UserSeeder::class,
-            // TrackSeeder::class,
-            // CourseSeeder::class,
-            // LessonSeeder::class,
-            // LessonItemSeeder::class,
-            // QuestionSeeder::class,
-            // QuestionOptionSeeder::class,
-            // EnrollmentSeeder::class,
+            // UserSeeder::class,
+            TrackSeeder::class,
+            CourseSeeder::class,
+            LessonSeeder::class,
+            LessonItemSeeder::class,
+            QuestionSeeder::class,
+            QuestionOptionSeeder::class,
+            EnrollmentSeeder::class,
         ]);
     }
 }

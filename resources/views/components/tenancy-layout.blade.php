@@ -1,3 +1,8 @@
+@php
+$company = App\Models\Company::first();
+$companyColor = $company->color_hex ?? '#000000';
+@endphp
+
 <!DOCTYPE html>
 <html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
 
@@ -8,15 +13,21 @@
 
     <title>{{ config('app.name', 'Laravel') }}</title>
 
+    @if($company && $company->favicon_path)
+        <link rel="icon" href="{{ asset($company->favicon_path) }}" type="image/x-icon">
+        @if($company->favicon_path_dark)
+            <link rel="icon" href="{{ asset($company->favicon_path_dark) }}" type="image/x-icon" media="(prefers-color-scheme: dark)">
+        @endif
+    @else
+        <link rel="icon" href="/images/favicon.ico" type="image/x-icon">
+    @endif
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.bunny.net">
     <link href="https://fonts.bunny.net/css?family=figtree:400,500,600&display=swap" rel="stylesheet" />
 
 
-    @php
-        $company = App\Models\Company::first();
-        $companyColor = $company->color_hex ?? '#000000';
-    @endphp
+
 
     @livewireStyles
     <!-- Scripts -->

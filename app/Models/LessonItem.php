@@ -60,4 +60,9 @@ class LessonItem extends Model
     {
         return $this->belongsTo(User::class, 'updated_by');
     }
+
+    public function questions(): HasMany
+    {
+        return $this->hasMany(Question::class);
+    }
 }

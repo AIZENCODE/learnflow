@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Admin\CompanyController;
 use App\Http\Controllers\Admin\CourseController;
+use App\Http\Controllers\Admin\GeneralController;
+use App\Http\Controllers\Admin\RolController;
 use App\Http\Controllers\Admin\TrackController;
 use Illuminate\Support\Facades\Route;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
@@ -42,6 +44,10 @@ Route::middleware([
     Route::resource('companies', CompanyController::class);
     Route::resource('tracks', TrackController::class);
     Route::resource('courses', CourseController::class);
+    Route::resource('roles', RolController::class);
+
+    Route::get('general', [GeneralController::class, 'index'])->name('general.index');
+
     require __DIR__ . '/auth.php';
 });
 
