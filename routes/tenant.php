@@ -11,6 +11,7 @@ use App\Http\Controllers\Admin\Client\TrackController as ClientTrackController;
 use App\Http\Controllers\Admin\RolController;
 use App\Http\Controllers\Admin\TrackController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Middleware\CheckTenantIsActive;
 use Stancl\Tenancy\Middleware\InitializeTenancyByDomain;
 use Stancl\Tenancy\Middleware\PreventAccessFromCentralDomains;
 
@@ -30,6 +31,7 @@ Route::middleware([
     'web',
     InitializeTenancyByDomain::class,
     PreventAccessFromCentralDomains::class,
+    CheckTenantIsActive::class,
 ])->group(function () {
     Route::get('/', function () {
         return view('admin.welcome');
@@ -73,37 +75,39 @@ Route::middleware([
 
         // Logout
         Route::post('logout', [\App\Http\Controllers\Auth\AuthenticatedSessionController::class, 'destroy'])->name('logout');
+
+        // Rutas de administración
+        Route::resource('users', UserController::class);
+        Route::resource('companies', CompanyController::class);
+        Route::resource('tracks', TrackController::class);
+        Route::resource('courses', CourseController::class);
+        Route::resource('roles', RolController::class);
+
+
+        // Rutas para clientes
+        Route::group(['prefix' => 'client'], function () {
+
+            Route::get('general', [GeneralController::class, 'index'])->name('general.index');
+
+            Route::get('courses/{course}', [ClientCourseController::class, 'show'])->name('client.courses.show');
+            Route::get('tracks/{track}', [ClientTrackController::class, 'show'])->name('client.tracks.show');
+            // Vistas index para clientes
+            Route::get('tracks', function () {
+                $tracks = \App\Models\Track::withCount('courses')
+                    ->orderBy('order')
+                    ->get();
+                $company = \App\Models\Company::first();
+                return view('admin.clients.tracks.index', compact('tracks', 'company'));
+            })->name('client.tracks.index');
+            Route::get('courses', function () {
+                $courses = \App\Models\Course::where('is_published', true)
+                    ->with('track')
+                    ->withCount('lessons')
+                    ->orderBy('order_in_track')
+                    ->get();
+                $company = \App\Models\Company::first();
+                return view('admin.clients.courses.index', compact('courses', 'company'));
+            })->name('client.courses.index');
+        });
     });
-
-    Route::resource('users', UserController::class);
-    Route::resource('companies', CompanyController::class);
-    Route::resource('tracks', TrackController::class);
-    Route::resource('courses', CourseController::class);
-    Route::resource('roles', RolController::class);
-
-    Route::get('general', [GeneralController::class, 'index'])->name('general.index');
-
-    // Rutas para clientes
-    Route::get('client/courses/{course}', [ClientCourseController::class, 'show'])->name('client.courses.show');
-    Route::get('client/tracks/{track}', [ClientTrackController::class, 'show'])->name('client.tracks.show');
-
-    // Vistas index para clientes
-    Route::get('client/tracks', function() {
-        $tracks = \App\Models\Track::withCount('courses')
-            ->orderBy('order')
-            ->get();
-        $company = \App\Models\Company::first();
-        return view('admin.clients.tracks.index', compact('tracks', 'company'));
-    })->name('client.tracks.index');
-
-    Route::get('client/courses', function() {
-        $courses = \App\Models\Course::where('is_published', true)
-            ->with('track')
-            ->withCount('lessons')
-            ->orderBy('order_in_track')
-            ->get();
-        $company = \App\Models\Company::first();
-        return view('admin.clients.courses.index', compact('courses', 'company'));
-    })->name('client.courses.index');
 });
-

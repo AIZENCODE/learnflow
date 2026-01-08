@@ -13,8 +13,8 @@ class TenantController extends Controller
      */
     public function index()
     {
-        $tenants = Tenant::all();
-        return view('tenants.inquilinos.index', compact('tenants'));
+        $tenants = Tenant::with('domains')->paginate(15);
+        return view('dashboard.tenants.index', compact('tenants'));
     }
 
     /**
@@ -22,7 +22,7 @@ class TenantController extends Controller
      */
     public function create()
     {
-        return view('tenants.inquilinos.create');
+        return view('dashboard.tenants.create');
     }
 
     /**
@@ -38,12 +38,14 @@ class TenantController extends Controller
 
         $tenant = Tenant::create([
             'id' => $request->id,
+            'is_active' => true, // Por defecto activo
         ]);
         $tenant->domains()->create([
             // 'domain' => $request->name . '.' . config('tenancy.central_domains')[0],
-            'domain' => $request->id . '.learnflow.test',
+            // 'domain' => $request->id . '.learnflow.test',
+            'domain' => $request->id . '.' . env('APP_TENANT_DOMAIN'),
         ]);
-        return redirect()->route('tenants.index')->with('success', 'Tenant created successfully');
+        return redirect()->route('tenants.index')->with('success', 'Inquilino creado exitosamente');
     }
 
     /**
@@ -51,7 +53,7 @@ class TenantController extends Controller
      */
     public function show(Tenant $tenant)
     {
-        return view('tenants.inquilinos.show', compact('tenant'));
+        return view('dashboard.tenants.show', compact('tenant'));
     }
 
     /**
@@ -59,7 +61,7 @@ class TenantController extends Controller
      */
     public function edit(Tenant $tenant)
     {
-        return view('tenants.inquilinos.edit', compact('tenant'));
+        return view('dashboard.tenants.edit', compact('tenant'));
     }
 
     /**
@@ -70,14 +72,33 @@ class TenantController extends Controller
         $request->validate([
             'id' => 'required|string|unique:tenants,id,' . $tenant->id . '|max:255',
         ]);
+
         $tenant->update([
             'id' => $request->get('id')
         ]);
 
-        $tenant->domains()->update([
-            'domain' => $request->get('id') . '.learnflow.test',
+        // Actualizar el dominio del tenant
+        $domain = $tenant->domains->first();
+        if ($domain) {
+            $domain->update([
+                'domain' => $request->get('id') . '.' . env('APP_TENANT_DOMAIN'),
+            ]);
+        }
+
+        return redirect()->route('tenants.index')->with('success', 'Inquilino actualizado exitosamente');
+    }
+
+    /**
+     * Toggle the active status of the tenant.
+     */
+    public function toggleActive(Tenant $tenant)
+    {
+        $tenant->update([
+            'is_active' => !$tenant->is_active,
         ]);
-        return redirect()->route('tenants.index')->with('success', 'Tenant updated successfully');
+
+        $status = $tenant->is_active ? 'activado' : 'desactivado';
+        return redirect()->route('tenants.index')->with('success', "Inquilino {$status} exitosamente");
     }
 
     /**
@@ -86,6 +107,6 @@ class TenantController extends Controller
     public function destroy(Tenant $tenant)
     {
         $tenant->delete();
-        return redirect()->route('tenants.index')->with('success', 'Tenant deleted successfully');
+        return redirect()->route('tenants.index')->with('success', 'Inquilino eliminado exitosamente');
     }
 }

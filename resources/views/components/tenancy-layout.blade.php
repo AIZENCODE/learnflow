@@ -1,6 +1,17 @@
 @php
-$company = App\Models\Company::first();
-$companyColor = $company->color_hex ?? '#000000';
+    $title = config('app.name', 'Laravel');
+    $title_section = isset($title_section) ? ' - ' . $title_section : '';
+    try {
+        if (Schema::hasTable('companies')) {
+            $company = App\Models\Company::first();
+            $title = $company->name ?? $title;
+            $companyColor = $company->color_hex ?? '#000000';
+        }
+    } catch (Exception $e) {
+        // Si hay error, mantener el título por defecto
+        $title = config('app.name', 'Laravel');
+        $companyColor = '#000000';
+    }
 @endphp
 
 <!DOCTYPE html>
@@ -11,7 +22,9 @@ $companyColor = $company->color_hex ?? '#000000';
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }}</title>
+    {{-- <title>{{ config('app.name', 'Laravel') }}</title> --}}
+
+    <title>{{ $title }} {{ $title_section }} </title>
 
     @if($company && $company->favicon_path)
         <link rel="icon" href="{{ asset($company->favicon_path) }}" type="image/x-icon">

@@ -11,7 +11,7 @@ foreach (config('tenancy.central_domains') as $domain) {
         });
 
         Route::get('/dashboard', function () {
-            return view('dashboard');
+            return view('dashboard.dashboard');
         })->middleware(['auth', 'verified'])->name('dashboard');
 
         Route::middleware('auth')->group(function () {
@@ -22,7 +22,10 @@ foreach (config('tenancy.central_domains') as $domain) {
 
         require __DIR__ . '/auth.php';
 
-        Route::resource('tenants', TenantController::class);
 
+        Route::middleware('auth')->group(function () {
+            Route::resource('tenants', TenantController::class);
+            Route::patch('tenants/{tenant}/toggle-active', [TenantController::class, 'toggleActive'])->name('tenants.toggle-active');
+        });
     });
 }

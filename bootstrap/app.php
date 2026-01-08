@@ -26,5 +26,13 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        //
+        // Personalizar redirección de autenticación para tenants
+        $exceptions->render(function (\Illuminate\Auth\AuthenticationException $e, \Illuminate\Http\Request $request) {
+            // Si estamos en un tenant, redirigir al login del tenant usando URL
+            if (tenancy()->tenant) {
+                return redirect()->guest(url('/login'));
+            }
+            // Si estamos en el dominio central, usar la ruta normal
+            return redirect()->guest(route('login'));
+        });
     })->create();
